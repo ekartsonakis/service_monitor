@@ -1,0 +1,44 @@
+#!/bin/bash
+#This script is triggered by service-monitor.sample
+#This service will monitor sample service by probing its port and will restart it if needed.
+#Copy and modify, add more actions in this script to monitor also other services.
+
+checkname=$(basename $0 | tr . @)
+monitored_service=${checkname##*@}
+timestamp=$(date +%y%m%d%H%M%S)
+
+################################    Edit the following before use ######################################################################
+
+check="curl --max-time 2 -S --silent  http://localhost:7890/api/health | grep -q Ok"    # This is the primary check command
+action="systemctl restart $monitored_service"                           # Primary action is restart the monitored service.
+#action1=""                                                             # Add more ations if needed like send a notification
+#action_final=""                                                        # Add an action if all retries will fail
+max_retries=5                                                           # Try x times  before give up
+init_delay=15                                                           # Do not start checks immediately. Wait for x seconds
+                                                                        #  and ensure this time is enough for monitored service to start
+retry_for_mins=15                                                       # If all retries took place in x minutes then stop
+########################################################################################################################################
+
+#Do not start checks imediately. Ensuring that monitored service is started.
+sleep ${init_delay}
+#find and clean older retries
+find /run -name "${checkname}*" -mmin +"${retry_for_mins}" -delete
+
+eval ${check}
+if [[ ! $? -eq 0 ]]; then
+    retries=$(find /run -name "${checkname}*" | wc -l)
+    if [[ ${retries} -le ${max_retries} ]]; then
+        touch /run/${checkname}-${timestamp}
+        logger -t "${checkname} Monitoring of ${monitored_service} found a problem! Action: ${action}"
+        eval ${action}
+#       eval $action1
+    else
+        logger -t ${checkname} "Stoppping $monitored_service since it is malfunctioning and max retries reached."
+        logger -t ${checkname} "Self stopping monitoring of ${monitored_service}. Max retries (${max_retries}) reached."
+        find /run -name "${checkname}*" -delete
+#       eval ${action_final}
+        systemctl stop ${monitored_service}
+        systemctl stop ${checkname}
+    fi
+fi
+exit 0
