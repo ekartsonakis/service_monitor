@@ -1,0 +1,16 @@
+[Unit]
+Description= Monitoring of %i
+After=%i.service
+Requires=%i.service
+PartOf=%i.service
+Wants=%i.service
+
+[Service]
+Type=simple
+ExecStart=/opt/service-monitor/monitor.%i
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
+WantedBy=%i.service
