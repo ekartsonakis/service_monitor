@@ -10,7 +10,7 @@ Please note that this service is meaningful only if your monitored service is no
 Installation
 ===
 
-1. Copy service template as is `service-monitor@.service` file under your /usr/lib/systemd/system/. 
+1. Copy service template as is `service-monitor@.service` file under your `/usr/lib/systemd/system/`. 
 2. Rename `sample.monitor` check script to the service name you want to monitor and keep this filename format: `[service_to_monitor].monitor`, For example `cassandra.monitor` 
 3. Modify check script and add more actions or checks to meet your needs and place it under `/opt/service-monitor/`. If you change this location edit the service file too.
 4. Run `systemctl daemon-reload` and  `systemctl enable cassandra.monitor`  and `systemctl start cassandra.monitor`. Enabling this service is crucial to let it start and stop when the monitored service is doing the same on demand.
