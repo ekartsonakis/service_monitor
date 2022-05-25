@@ -7,6 +7,13 @@ This is an automatic way to restart your services based on user defined checks. 
 
 Please note that this service is meaningful only if your monitored service is not failing itself but it keeps its status "running" without serving its original purpose. If you have a self failing service, systemd can handle it if you work with service systemd options like  `Restart=on-failure`.  
 
+Better than Monit?
+===
+* No external package needed
+* No need to stop/start monitoring. Monitoring service is dependent on the monitored service and it is controlled by systemd
+* Build your checks as simple or complicated you like
+
+
 Installation
 ===
 
